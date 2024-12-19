@@ -4,6 +4,8 @@
 # Copyright (C) 2022 ArtInChip Technology Co., Ltd
 # Matteo <duanmt@artinchip.com>
 
+# Copyright (C) 2024 cdg66(github)
+
 # $1 - 'quiet', run the install with no question
 
 MY_NAME=$0
@@ -85,6 +87,8 @@ check_os()
 	if [ -f /etc/lsb-release ]; then
 		OS_VER=`cat /etc/lsb-release | grep RELEASE | awk -F '=' '{print $2}'`
 		OS_TYPE="Ubuntu"
+
+	
 	elif [ -f /etc/redhat-release ]; then
 		cat /etc/redhat-release 2>&1 | grep CentOS
 		if [ $? -eq 0 ]; then
@@ -94,6 +98,10 @@ check_os()
 			OS_VER=`cat /etc/redhat-release | awk -F 'release ' '{print $2}' | awk '{print $1}'`
 			OS_TYPE=`cat /etc/redhat-release | awk -F 'release ' '{print $1}'`
 		fi
+	elif [ -f /etc/os-release ]; then
+		OS_VER=`cat /etc/os-release | grep PRETTY_NAME | awk -F '=' '{print $2}'`
+		OS_TYPE="Debian"
+
 	else
 		pr_err "Unknow system OS"
 		exit $ERR_UNSURPPORTED
@@ -227,7 +235,7 @@ check_gcc_ver()
 	input_an_answer
 	if [ $ANSWER = "Y" ] || [ $ANSWER = "y" ]; then
 		$INSTALL_CALLBACK wget
-		if [ "$OS_TYPE" = "Ubuntu" ]; then
+		if [ "$OS_TYPE" = "Ubuntu" ] || [ "$OS_TYPE" = "Debian" ]; then
 			$INSTALL_CALLBACK zip
 			$INSTALL_CALLBACK zlib1g-dev
 		else
@@ -444,7 +452,7 @@ if [ "x$1" = "xquiet" ]; then
 fi
 
 INSTALL_RESULT=$TRUE
-if [ $OS_TYPE = "Ubuntu" ]; then
+if [ $OS_TYPE = "Ubuntu" ] || [ "$OS_TYPE" = "Debian" ]; then
 	ubuntu_install
 else
 	redhat_install
